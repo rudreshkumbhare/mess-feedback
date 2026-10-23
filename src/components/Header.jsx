@@ -1,4 +1,4 @@
-import { CheckCircle2, UtensilsCrossed, ChefHat, Award } from 'lucide-react';
+import { CheckCircle2, ChefHat, Award } from 'lucide-react';
 
 export default function Header({ view, onViewChange, points, onOpenRewards }) {
   const today = new Date().toLocaleDateString('en-IN', {
@@ -12,10 +12,12 @@ export default function Header({ view, onViewChange, points, onOpenRewards }) {
     <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
         {/* Logo & Date */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <UtensilsCrossed size={16} className="text-white" strokeWidth={2} />
-          </div>
+        <div className="flex items-center gap-2.5">
+          <img 
+            src="/logo.svg" 
+            alt="MessMate Logo" 
+            className="w-8 h-8 rounded-lg shadow-xs flex-shrink-0 object-contain" 
+          />
           <div>
             <span className="font-semibold text-slate-900 text-[15px] leading-none block">MessMate</span>
             <span className="text-xs text-slate-400 leading-none block mt-0.5 hidden sm:block">{today}</span>
