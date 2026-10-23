@@ -16,6 +16,23 @@
   }
 }
 
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.15s ease-out forwards;
+  }
+}
+
 @layer components {
   .star-btn {
     @apply cursor-pointer transition-transform duration-75 hover:scale-110 active:scale-95;

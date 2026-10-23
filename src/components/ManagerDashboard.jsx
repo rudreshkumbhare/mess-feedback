@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  Award,
   CheckCircle2,
   ChevronDown,
   Clock,
@@ -125,6 +126,7 @@ export default function ManagerDashboard({ allFeedback }) {
       : 0;
   const needsAttentionCount = dishStats.filter((d) => d.status === 'poor').length;
   const totalDishesRated = dishStats.length;
+  const totalPointsAwarded = allFeedback.reduce((acc, fb) => acc + 10 + (fb.comment ? 5 : 0), 0);
 
   // Lowest-rated dishes (bottom 3, must have poor or average status)
   const lowestRated = [...dishStats]
@@ -148,17 +150,17 @@ export default function ManagerDashboard({ allFeedback }) {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <SummaryCard
           icon={Users}
-          label="Total Submissions"
+          label="Submissions"
           value={totalSubmissions}
-          sub="feedback entries"
+          sub="student reviews"
           color="slate"
         />
         <SummaryCard
           icon={Star}
-          label="Overall Avg Rating"
+          label="Overall Avg"
           value={overallAvg > 0 ? `${overallAvg}/5` : '—'}
           sub="across all dishes"
           color={overallAvg >= 3.5 ? 'green' : overallAvg >= 2.5 ? 'amber' : 'red'}
@@ -174,8 +176,15 @@ export default function ManagerDashboard({ allFeedback }) {
           icon={CheckCircle2}
           label="Dishes Rated"
           value={totalDishesRated}
-          sub="today"
+          sub="unique dishes"
           color="slate"
+        />
+        <SummaryCard
+          icon={Award}
+          label="Points Given"
+          value={`${totalPointsAwarded}`}
+          sub="reward tokens"
+          color="amber"
         />
       </div>
 

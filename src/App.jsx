@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import Header from './components/Header';
 import StudentView from './components/StudentView';
 import ManagerDashboard from './components/ManagerDashboard';
+import RewardsModal from './components/RewardsModal';
 import { SEED_FEEDBACK } from './data/mockData';
 
 // Load persisted new submissions from localStorage, merge with seed
@@ -42,8 +43,47 @@ function saveView(view) {
   }
 }
 
+function loadPoints() {
+  try {
+    const stored = localStorage.getItem('messmate_points');
+    if (stored !== null) return parseInt(stored, 10);
+  } catch {
+    // ignore
+  }
+  return 75; // Starting balance to immediately showcase perks
+}
+
+function savePoints(points) {
+  try {
+    localStorage.setItem('messmate_points', points.toString());
+  } catch {
+    // ignore
+  }
+}
+
+function loadRedeemed() {
+  try {
+    const stored = localStorage.getItem('messmate_redeemed');
+    if (stored) return JSON.parse(stored);
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function saveRedeemed(redeemed) {
+  try {
+    localStorage.setItem('messmate_redeemed', JSON.stringify(redeemed));
+  } catch {
+    // ignore
+  }
+}
+
 export default function App() {
   const [view, setView] = useState(() => loadView());
+  const [points, setPoints] = useState(() => loadPoints());
+  const [redeemedIds, setRedeemedIds] = useState(() => loadRedeemed());
+  const [isRewardsOpen, setIsRewardsOpen] = useState(false);
 
   // newSubmissions: feedback submitted by the user in this session or prior sessions (persisted)
   const [newSubmissions, setNewSubmissions] = useState(() => loadFeedback());
@@ -59,7 +99,7 @@ export default function App() {
     saveView(v);
   }, []);
 
-  const handleSubmit = useCallback(({ dishId, dishName, meal, rating, comment }) => {
+  const handleSubmit = useCallback(({ dishId, dishName, meal, rating, comment, pointsEarned }) => {
     const entry = {
       id: `user-${Date.now()}-${dishId}`,
       dishId,
@@ -77,18 +117,60 @@ export default function App() {
       saveFeedback(updated);
       return updated;
     });
+
+    // Award Points
+    setPoints((prev) => {
+      const updated = prev + (pointsEarned || 10);
+      savePoints(updated);
+      return updated;
+    });
+  }, []);
+
+  const handleRedeem = useCallback((reward) => {
+    setPoints((prev) => {
+      if (prev < reward.pointsCost) return prev;
+      const updated = prev - reward.pointsCost;
+      savePoints(updated);
+      return updated;
+    });
+
+    setRedeemedIds((prev) => {
+      const updated = [...prev, reward.id];
+      saveRedeemed(updated);
+      return updated;
+    });
   }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header view={view} onViewChange={handleViewChange} />
+      <Header 
+        view={view} 
+        onViewChange={handleViewChange} 
+        points={points} 
+        onOpenRewards={() => setIsRewardsOpen(true)} 
+      />
+      
       <main>
         {view === 'student' ? (
-          <StudentView submittedDishes={submittedDishes} onSubmit={handleSubmit} />
+          <StudentView 
+            submittedDishes={submittedDishes} 
+            onSubmit={handleSubmit} 
+            points={points}
+            onOpenRewards={() => setIsRewardsOpen(true)}
+          />
         ) : (
           <ManagerDashboard allFeedback={allFeedback} />
         )}
       </main>
+
+      {/* Rewards & Redemption Modal */}
+      <RewardsModal
+        isOpen={isRewardsOpen}
+        onClose={() => setIsRewardsOpen(false)}
+        points={points}
+        redeemedIds={redeemedIds}
+        onRedeem={handleRedeem}
+      />
     </div>
   );
 }
